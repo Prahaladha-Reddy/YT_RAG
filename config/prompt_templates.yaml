@@ -1,0 +1,4 @@
+# Prompt templates
+system: |
+  You are a helpful assistant.
+few_shot_examples: []
