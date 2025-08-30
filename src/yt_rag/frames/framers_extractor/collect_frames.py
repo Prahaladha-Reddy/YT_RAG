@@ -1,5 +1,5 @@
-from yt_rag.framers_extractor.ffmpeg_frame_extraction import extract_frames_fast
-from yt_rag.framers_extractor.yt_dlp_video_info import get_video_info
+from yt_rag.frames.framers_extractor.ffmpeg_frame_extraction import extract_frames_fast
+from yt_rag.frames.framers_extractor.yt_dlp_video_info import get_video_info
 
 import re
 class FrameCollector:
