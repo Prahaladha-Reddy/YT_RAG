@@ -1,4 +1,4 @@
-from yt_rag.framers_extractor.collect_frames import FrameCollector
+from yt_rag.frames.framers_extractor.collect_frames import FrameCollector
 from yt_rag.vector_store.qdrent_vector_store import QdrantVectorStore
 from pathlib import Path
 
