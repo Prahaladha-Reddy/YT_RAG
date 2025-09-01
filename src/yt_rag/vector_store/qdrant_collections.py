@@ -1,9 +1,9 @@
-from yt_rag.vector_store.custome_qdrent_client import get_qdrent
+from yt_rag.vector_store.custome_qdrant_client import get_qdrant
 from qdrant_client.models import PointStruct, VectorParams, Distance
 
 
 def upsert_to_collection(Collection_name,embeddings,images_collection,video_id):
-  client=get_qdrent()
+  client=get_qdrant()
   print("Recieved clinet")
 
   if Collection_name in [collection.name for collection in client.get_collections().collections]:

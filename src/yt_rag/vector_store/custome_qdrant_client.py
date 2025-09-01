@@ -5,10 +5,10 @@ import os
 load_dotenv()
 
 
-def get_qdrent():
+def get_qdrant():
   qdrant_client = QdrantClient(
-      url=os.getenv('QDRENT_URL'), 
-      api_key=os.getenv('QDRENT_KEY'),
+      url=os.getenv('qdrant_URL'), 
+      api_key=os.getenv('qdrant_KEY'),
   )
   return qdrant_client
 

@@ -1,5 +1,5 @@
 from yt_rag.frames.framers_extractor.collect_frames import FrameCollector
-from yt_rag.vector_store.qdrent_vector_store import QdrantVectorStore
+from yt_rag.vector_store.qdrant_vector_store import QdrantVectorStore
 from pathlib import Path
 
 def list_images(dir_path: str):

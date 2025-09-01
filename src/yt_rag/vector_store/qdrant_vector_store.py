@@ -1,6 +1,6 @@
 from yt_rag.vector_store.create_embeddings import create_text_embeddings, create_image_embeddings
-from yt_rag.vector_store.vector_search import qdrent_search
-from yt_rag.vector_store.qdrent_collections import upsert_to_collection
+from yt_rag.vector_store.vector_search import qdrant_search
+from yt_rag.vector_store.qdrant_collections import upsert_to_collection
 
 class QdrantVectorStore:
     def __init__(self):
@@ -46,7 +46,7 @@ class QdrantVectorStore:
 
         print(f"Searching collection '{collection_name}'...")
         try:
-            search_results = qdrent_search(
+            search_results = qdrant_search(
                 query_embeddings=query_embedding,
                 collection_name=collection_name
             )
