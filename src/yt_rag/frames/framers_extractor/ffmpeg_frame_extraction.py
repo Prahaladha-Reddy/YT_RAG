@@ -16,7 +16,7 @@ def extract_frames_fast(stream_url: str,vid:str):
         'ffmpeg',
         '-i', stream_url,                     # Input from the direct stream URL
         '-vf', 'fps=1/60',                    # The filter to apply: 1 frame every 10 seconds
-        f'{output_dir}/frame_%04d.jpg'         # The output file pattern
+        f'{output_dir}/frame_%04d.jpg'        # The output file pattern
     ]
 
     try:

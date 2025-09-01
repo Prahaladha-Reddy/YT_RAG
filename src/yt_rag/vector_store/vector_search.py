@@ -1,8 +1,8 @@
-from yt_rag.vector_store.custome_qdrent_client import get_qdrent
+from yt_rag.vector_store.custome_qdrant_client import get_qdrant
 
-def qdrent_search(collection_name,query_embeddings):
+def qdrant_search(collection_name,query_embeddings):
 
-  client=get_qdrent()
+  client=get_qdrant()
   frames_metadata = []
   results = client.search(
     collection_name=collection_name,
