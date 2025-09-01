@@ -26,7 +26,6 @@ class FrameCollector:
         print(f"extracting one frame every {self.frame_interval} seconds...")
         extract_frames_fast(
             stream_url=stream_url,
-            sf1f=self.frame_interval,
             vid=self.video_id
         )
         print("process complete")

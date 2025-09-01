@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-def extract_frames_fast(stream_url: str,sf1f:str,vid:str):
+def extract_frames_fast(stream_url: str,vid:str):
     """
     Uses a single, efficient FFmpeg command to extract frames every 10 seconds.
     
@@ -23,3 +23,5 @@ def extract_frames_fast(stream_url: str,sf1f:str,vid:str):
         subprocess.run(command, check=True, capture_output=True, text=True)
     except subprocess.CalledProcessError as e:
         print(f"Error: {e.stderr}")
+
+
