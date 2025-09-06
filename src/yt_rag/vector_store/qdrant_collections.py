@@ -1,38 +1,139 @@
-from yt_rag.vector_store.custome_qdrant_client import get_qdrant
-from qdrant_client.models import PointStruct, VectorParams, Distance
+import logging
+import uuid
+from yt_rag.vector_store.qdrant_db import get_qdrant_client
+from qdrant_client.models import PointStruct, VectorParams, Distance, PayloadSchemaType
+
+logger = logging.getLogger(__name__)
 
 
-def upsert_to_collection(Collection_name,embeddings,images_collection,video_id):
-  client=get_qdrant()
-  print("Recieved clinet")
+def upsert_images_to_collection(
+    collection_name: str,
+    embeddings: list,
+    images_metadata: list,
+    video_id: str
+):
+    """
+    Upsert image embeddings to a Qdrant collection.
+    """
+    try:
+        client = get_qdrant_client()
+        
+        if collection_name in [collection.name for collection in client.get_collections().collections]:
+            logger.info(f"Collection exists: {collection_name}")
+            points = [
+                PointStruct(
+                    id = images_metadata[idx]["id"],
+                    vector = {"image_vector": embedding},
+                    payload = {
+                        "video_id": video_id,
+                        "type": "image",
+                        "path": images_metadata[idx]["path"]
+                    }
+                    
+                ) for idx, embedding in enumerate(embeddings)
+            ]
 
-  if Collection_name in [collection.name for collection in client.get_collections().collections]:
-    print(f"There is this collection {Collection_name}")
-    points = [
-      PointStruct(id=idx,
-                  vector=embedding,
-                  payload={"path": images_collection[idx],"vid_id":video_id})
-      for idx, embedding in enumerate(embeddings)
-    ]
-    print("completed constructing points")
+            client.upsert(collection_name=collection_name, points=points)
+            return True
+        else:
+            logger.info(f"Create a collection: {collection_name}")
+            client.create_collection(
+                collection_name=collection_name,
+                vectors_config={
+                    "text_vector": VectorParams(size=512, distance=Distance.COSINE),
+                    "image_vector": VectorParams(size=512, distance=Distance.COSINE)
+                }
+            )
+            
+            
+            # Add payload index for filtering
+            client.create_payload_index(
+                collection_name=collection_name,
+                field_name="type",
+                field_schema=PayloadSchemaType.KEYWORD,
+            )
 
-    client.upsert(collection_name=Collection_name, points=points)
-    print("upserting completed")
-  else:
-    print(f"the collection with name is {Collection_name} not fond so creating one")
-    client.create_collection(
-        collection_name=Collection_name,
-        vectors_config=VectorParams(size=512, distance=Distance.COSINE)
-    )
-    print(f"the collection with name is {Collection_name} has been created")
+            points = [
+                PointStruct(
+                    id = images_metadata[idx]["id"],
+                    vector = {"image_vector": embedding},
+                    payload = {
+                        "video_id": video_id,
+                        "type": "image",
+                        "path": images_metadata[idx]["path"]
+                    }
+                    
+                ) for idx, embedding in enumerate(embeddings)
+            ]
 
-    points = [
-      PointStruct(id=idx,
-                  vector=embedding,
-                  payload={"path": images_collection[idx],"vid_id":video_id})
-      for idx, embedding in enumerate(embeddings)
-    ]
-    print("completed constructing points")
+            client.upsert(collection_name=collection_name, points=points)
+            return True
 
-    client.upsert(collection_name=Collection_name, points=points)
-    print("upserting completed")
+    except Exception as e:
+        logger.error(f"Failed to upsert images to collection: {e}")
+        return False
+
+def upsert_transcript_chunks_to_collection(
+    collection_name: str, 
+    embeddings: list, 
+    transcript_metadata: list, 
+    video_id: str
+):
+    try:
+        client = get_qdrant_client()
+
+        if collection_name in [collection.name for collection in client.get_collections().collections]:
+            logger.info(f"Collection exists: {collection_name}")
+            points = [
+                PointStruct(
+                    id = transcript_metadata[idx]["id"],
+                    vector = {"text_vector": embedding},
+                    payload = {
+                        "video_id": video_id,
+                        "type": "text",
+                        "start_time": transcript_metadata[idx]["start"],
+                        "metadata": transcript_metadata[idx]
+                    },
+                    
+                )
+                for idx, embedding in enumerate(embeddings)
+            ]
+            
+            client.upsert(collection_name=collection_name, points=points)
+            return True
+        else:
+            client.create_collection(
+                collection_name=collection_name,
+                vectors_config={
+                    "text_vector":VectorParams(size=512, distance=Distance.COSINE),
+                    "image_vector": VectorParams(size=512, distance=Distance.COSINE)
+                }
+            )
+            
+            # Add payload index for filtering
+            client.create_payload_index(
+                collection_name=collection_name,
+                field_name="type",
+                field_schema=PayloadSchemaType.KEYWORD,
+            )
+
+            logger.info(f"Create a collection: {collection_name}")
+            points = [
+                PointStruct(
+                    id = transcript_metadata[idx]["id"],
+                    vector = {"text_vector": embedding},
+                    payload = {
+                        "video_id": video_id,
+                        "type": "text",
+                        "start_time": transcript_metadata[idx]["start"],
+                        "metadata": transcript_metadata[idx]
+                    }
+                )
+                for idx, embedding in enumerate(embeddings)
+            ]
+            
+            client.upsert(collection_name=collection_name, points=points)
+            return True
+    except Exception as e:
+        logger.error(f"Failed to upsert transcript chunks to collection: {e}")
+        return False
