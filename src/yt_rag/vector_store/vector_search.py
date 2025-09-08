@@ -1,5 +1,4 @@
 from yt_rag.vector_store.qdrant_db import get_qdrant_client
-from yt_rag.vector_store.embeddings import create_text_embeddings
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 import logging
 
