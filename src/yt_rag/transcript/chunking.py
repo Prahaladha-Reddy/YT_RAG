@@ -5,6 +5,7 @@ import logging
 from yt_rag.transcript.fallback_transcript_extraction import fallback_transcript_extract
 from yt_rag.transcript.playwright_scraper import extract_transcript
 from yt_rag.helper.get_id_from_youtube_url import get_video_id
+from yt_rag.transcript.playwright_scraper import extract_transcript
 
 logger = logging.getLogger(__name__)
 
@@ -56,9 +57,9 @@ def trascript_chunking_by_time(
         logger.error(f"Error chunking transcript: {str(e)}")
         return None
 
-def get_transcript_chunks(youtube_url: str, chunk_duration: int, overlap_entires):
+async def get_transcript_chunks(youtube_url: str, chunk_duration: int, overlap_entires):
     
-    transcript_data = extract_transcript(youtube_url)
+    transcript_data = await extract_transcript(youtube_url)
     
     if transcript_data:
         logger.info("Transcript data extracted with playwright")

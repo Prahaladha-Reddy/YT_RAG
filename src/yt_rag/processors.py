@@ -15,7 +15,6 @@ DEFAULT_OVERLAP_ENTRIES = 5
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 async def extract_video_content(youtube_url: str):
     """
     Extract transcript chunks and video frames in parallel from a YouTube video
@@ -27,10 +26,10 @@ async def extract_video_content(youtube_url: str):
     try:
         logger.info(f"Starting content extraction for video: {youtube_url}")
         
+        # Transcript extraction
         try:
             logger.info("Starting transcript extraction...")
-            transcript_chunks = await asyncio.to_thread(
-                get_transcript_chunks,
+            transcript_chunks = await get_transcript_chunks(
                 youtube_url=youtube_url,
                 chunk_duration=DEFAULT_CHUNK_DURATION,
                 overlap_entires=DEFAULT_OVERLAP_ENTRIES  # Fixed typo
@@ -40,6 +39,7 @@ async def extract_video_content(youtube_url: str):
             logger.error(f"Transcript extraction failed: {e}")
             logger.error(f"Transcript traceback: {traceback.format_exc()}")
         
+        # Frames extraction (runs regardless of transcript success/failure)
         try:
             logger.info("Starting frames extraction...")
             image_folder_path, images_metadata = await asyncio.to_thread(
