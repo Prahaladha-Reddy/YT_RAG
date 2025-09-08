@@ -3,7 +3,7 @@ import logging
 import uuid
 import json
 from typing import List, Optional, Tuple, Dict, Any
-
+import traceback
 from yt_rag.transcript.chunking import get_transcript_chunks
 from yt_rag.frames.collect_frames import collect_frames_from_ffmpeg
 from yt_rag.vector_store.embeddings import create_image_embeddings, create_text_embeddings_batch
@@ -16,46 +16,50 @@ DEFAULT_OVERLAP_ENTRIES = 5
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 async def extract_video_content(youtube_url: str):
     """
     Extract transcript chunks and video frames in parallel from a YouTube video
     """
+    transcript_chunks = None
+    image_folder_path = None
+    images_metadata = None
+    
     try:
         logger.info(f"Starting content extraction for video: {youtube_url}")
         
-        # Create parallel tasks for transcript and frame extraction
-        transcript_task = asyncio.create_task(
-            asyncio.to_thread(
+        try:
+            logger.info("Starting transcript extraction...")
+            transcript_chunks = await asyncio.to_thread(
                 get_transcript_chunks,
                 youtube_url=youtube_url,
                 chunk_duration=DEFAULT_CHUNK_DURATION,
-                overlap_entires=DEFAULT_OVERLAP_ENTRIES                    
+                overlap_entries=DEFAULT_OVERLAP_ENTRIES  # Fixed typo
             )
-        )
+            logger.info(f"Transcript extraction completed: {len(transcript_chunks) if transcript_chunks else 0} chunks")
+        except Exception as e:
+            logger.error(f"Transcript extraction failed: {e}")
+            logger.error(f"Transcript traceback: {traceback.format_exc()}")
         
-        frames_task = asyncio.create_task(
-            asyncio.to_thread(
+        try:
+            logger.info("Starting frames extraction...")
+            image_folder_path, images_metadata = await asyncio.to_thread(
                 collect_frames_from_ffmpeg,
                 youtube_url=youtube_url
             )
-        )
+            logger.info(f"Frames extraction completed: {len(images_metadata) if images_metadata else 0} frames")
+        except Exception as e:
+            logger.error(f"Frames extraction failed: {e}")
+            logger.error(f"Frames traceback: {traceback.format_exc()}")
         
-        # Wait for both tasks to complete
-        transcript_chunks, (image_folder_path, images_metadata) = await asyncio.gather(
-            transcript_task,
-            frames_task
-        )
-        
-        logger.info(f"Content extraction completed. Transcript chunks: {len(transcript_chunks) if transcript_chunks else 0}, "
+        logger.info(f"Content extraction summary - Transcript chunks: {len(transcript_chunks) if transcript_chunks else 0}, "
                    f"Frames: {len(images_metadata) if images_metadata else 0}")
         
         return transcript_chunks, image_folder_path, images_metadata
     
     except Exception as e:
-        logger.error(f"Error extracting content from video {youtube_url}: {e}")
-        return None, None, None
-
+        logger.error(f"Unexpected error in extract_video_content for {youtube_url}: {e}")
+        logger.error(f"Full traceback: {traceback.format_exc()}")
+        return transcript_chunks, image_folder_path, images_metadata
 
 async def process_image_embeddings(video_id: str, images_metadata: List[str]) -> bool:
     """
@@ -114,7 +118,7 @@ async def process_text_embeddings(video_id: str, transcript_chunks: List[Dict]) 
         return False
 
 
-async def process_youtube_video(youtube_url: str) -> bool:
+async def process_youtube_video(youtube_url: str):
     """
     Main function to process a YouTube video through the complete RAG pipeline.
     """
@@ -138,7 +142,7 @@ async def process_youtube_video(youtube_url: str) -> bool:
         else:
             logger.warning("No transcript chunks extracted, skipping text processing")
         
-        return True
+        return images_folder_path
         
     except Exception as e:
         logger.error(f"Error in video processing pipeline: {e}")
