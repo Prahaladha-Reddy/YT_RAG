@@ -67,8 +67,8 @@ def get_transcript_chunks(youtube_url: str, chunk_duration: int, overlap_entires
         transcript_chunks = trascript_chunking_by_time(
             transcript_data,
             video_id,
-            chunk_duration=200,
-            overlap_entires=5        
+            chunk_duration=chunk_duration,
+            overlap_entires=overlap_entires        
         )
         logger.info(f"Successfully chunked into : {len(transcript_chunks)} chunks")
         return transcript_chunks
