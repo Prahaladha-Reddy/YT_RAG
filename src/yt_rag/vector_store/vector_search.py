@@ -45,7 +45,8 @@ def retrieve_transcript_chunks(client, collection_name, query_embedding, top_k=5
         transcript_metadata.append({
             "score": chunk.score,
             "id": chunk.id,
-            "video_id": chunk.payload.get("video_id")
+            "video_id": chunk.payload.get("video_id"),
+            "page_content": chunk.payload.get("page_content")
         })
 
     return transcript_metadata

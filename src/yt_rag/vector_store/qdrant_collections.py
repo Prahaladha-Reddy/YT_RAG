@@ -92,7 +92,8 @@ def upsert_transcript_chunks_to_collection(
                         "video_id": video_id,
                         "type": "text",
                         "start_time": transcript_metadata[idx]["start"],
-                        "metadata": transcript_metadata[idx]
+                        "metadata": transcript_metadata[idx],
+                        "page_content": transcript_metadata[idx]["page_content"]
                     },
                     
                 )
@@ -126,7 +127,8 @@ def upsert_transcript_chunks_to_collection(
                         "video_id": video_id,
                         "type": "text",
                         "start_time": transcript_metadata[idx]["start"],
-                        "metadata": transcript_metadata[idx]
+                        "metadata": transcript_metadata[idx],
+                        "page_content": transcript_metadata[idx]["page_content"]
                     }
                 )
                 for idx, embedding in enumerate(embeddings)
