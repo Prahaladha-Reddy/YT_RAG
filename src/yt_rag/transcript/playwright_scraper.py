@@ -1,4 +1,4 @@
-from playwright.sync_api import sync_playwright
+from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
 import json
 import time
@@ -15,112 +15,146 @@ def timestamp_to_seconds(timestamp_str: str) -> int:
         return int(time_parts[0])
 
 
-def ensure_english_subtitles(page):
+async def ensure_english_subtitles(page):
     """
     Navigate to settings and select English subtitles if available
     """
-    # Open settings
-    page.click('button.ytp-settings-button', timeout=5000)
-    page.wait_for_selector('.ytp-menuitem', timeout=5000)
+    try:
+        # Open settings
+        await page.click('button.ytp-settings-button', timeout=5000)
+        await page.wait_for_selector('.ytp-menuitem', timeout=5000)
 
-    # Find the Subtitles/CC menu item
-    subtitles_item = page.query_selector('div.ytp-menuitem-label:has-text("Subtitles/CC")')
-    if not subtitles_item:
-        print("No subtitles/CC option found (video may not support captions).")
+        # Find the Subtitles/CC menu item
+        subtitles_item = await page.query_selector('div.ytp-menuitem-label:has-text("Subtitles/CC")')
+        if not subtitles_item:
+            print("No subtitles/CC option found (video may not support captions).")
+            return False
+
+        # Get parent container of Subtitles/CC
+        container = await subtitles_item.evaluate_handle('node => node.parentElement')
+
+        # Get text inside .ytp-menuitem-content (current language)
+        content_el = await container.query_selector('.ytp-menuitem-content')
+        content_text = await content_el.inner_text() if content_el else ""
+
+        print(f"Content Text on Subtitle item: {content_text}")
+
+        if content_text == "English":
+            print("Already English subtitles.")
+            return True
+
+        # Not English → click to open submenu
+        await container.click()
+        await page.wait_for_selector('.ytp-menuitem', timeout=5000)
+        
+        # Re-query fresh menu items to avoid previous menu items
+        options = await page.query_selector_all('.ytp-menuitem')
+        for i in range(len(options)):
+            opt = await page.query_selector(f'.ytp-menuitem:nth-child({i+1})')
+            if not opt:
+                continue
+            text = await opt.inner_text()
+            if text == "English":
+                await opt.click(force=True)
+                print("Switched to English subtitles.")
+                return True
+            
+        print(f"English subtitles not available.")
+        return False
+    except Exception as e:
+        print(f"Error ensuring English subtitles: {e}")
         return False
 
-    # Get parent container of Subtitles/CC
-    container = subtitles_item.evaluate_handle('node => node.parentElement')
 
-    # Get text inside .ytp-menuitem-content (current language)
-    content_el = container.query_selector('.ytp-menuitem-content')
-    content_text = content_el.inner_text() if content_el else ""
-
-    print(f"Content Text on Subtitle item: {content_text}")
-
-    if content_text == "English":
-        print("Already English subtitles.")
-        return True
-
-    # Not English → click to open submenu
-    container.click()
-    page.wait_for_selector('.ytp-menuitem', timeout=5000)
-    
-    # Re-query fresh menu items to avoid previous menu items
-    options = page.query_selector_all('.ytp-menuitem')
-    for i in range(len(options)):
-        opt = page.query_selector(f'.ytp-menuitem:nth-child({i+1})')
-        if not opt:
-            continue
-        text = opt.inner_text()
-        if text == "English":
-            opt.click(force=True)
-            print("Switched to English subtitles.")
-            return True
-        
-    print(f"English subtitles not avaliable.")
-    return False
-
-
-def extract_transcript(video_url: str):
+async def extract_transcript(video_url: str):
     """
-    Uses playwright to automate browser navigation
+    Uses async playwright to automate browser navigation
     and BeautifulSoup to scrape the transcript
 
     Args:
         video_url (str) - url of youtube video
     """
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        page = browser.new_page()
-        page.goto(video_url, wait_until="domcontentloaded", timeout=120000)
-
-        # Step 1: Ensure English subtitles
-        ensure_english_subtitles(page)
-
-        # Step 2: Click "Show more"
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)  # Changed to headless for API
+        page = await browser.new_page()
+        
         try:
-            page.click('tp-yt-paper-button#expand', timeout=5000)
-        except:
-            print("No 'Show more' button found.")
+            await page.goto(video_url, wait_until="domcontentloaded", timeout=120000)
 
-        # Step 3: Click "Show transcript"
-        try:
-            page.click('button:has-text("Show transcript")', timeout=5000)
-        except:
-            print("Transcript button not found. Maybe this video has no transcript.")
-            browser.close()
-            return []
+            # Step 1: Ensure English subtitles
+            await ensure_english_subtitles(page)
 
-        # Step 4: Wait for transcript elements
-        page.wait_for_selector('ytd-transcript-segment-renderer', timeout=10000)
+            # Step 2: Click "Show more"
+            try:
+                await page.click('tp-yt-paper-button#expand', timeout=5000)
+            except:
+                print("No 'Show more' button found.")
 
-        # Step 5: Extract transcript
-        html = page.content()
-        soup = BeautifulSoup(html, "html.parser")
+            # Step 3: Click "Show transcript"
+            try:
+                await page.click('button:has-text("Show transcript")', timeout=5000)
+            except:
+                print("Transcript button not found. Maybe this video has no transcript.")
+                return []
 
-        transcript_data = []
-        for segment in soup.select("ytd-transcript-segment-renderer"):
-            timestamp = segment.select_one(".segment-timestamp")
-            text = segment.select_one(".segment-text")
-            
-            if timestamp and text:
-                timestamp_str = timestamp.get_text(strip=True)
+            # Step 4: Wait for transcript elements
+            await page.wait_for_selector('ytd-transcript-segment-renderer', timeout=10000)
+
+            # Step 5: Extract transcript
+            html = await page.content()
+            soup = BeautifulSoup(html, "html.parser")
+
+            transcript_data = []
+            for segment in soup.select("ytd-transcript-segment-renderer"):
+                timestamp = segment.select_one(".segment-timestamp")
+                text = segment.select_one(".segment-text")
                 
-                transcript_data.append({
-                    "timestamp": timestamp_str,
-                    "seconds": timestamp_to_seconds(timestamp_str),
-                    "text": text.get_text(" ", strip=True)
-                })
+                if timestamp and text:
+                    timestamp_str = timestamp.get_text(strip=True)
+                    
+                    transcript_data.append({
+                        "timestamp": timestamp_str,
+                        "seconds": timestamp_to_seconds(timestamp_str),
+                        "text": text.get_text(" ", strip=True)
+                    })
 
-        browser.close()
-        return transcript_data
+            return transcript_data
+            
+        except Exception as e:
+            print(f"Error extracting transcript: {e}")
+            return []
+        finally:
+            await browser.close()
+
+
+# For backward compatibility, keep a sync wrapper
+def extract_transcript_sync(video_url: str):
+    """
+    Sync wrapper for the async extract_transcript function
+    """
+    import asyncio
+    
+    # Create a new event loop for this thread
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            # If we're already in an async context, we can't use this sync wrapper
+            raise RuntimeError("Cannot call sync function from async context. Use extract_transcript directly.")
+    except RuntimeError:
+        # No event loop running, create a new one
+        pass
+    
+    return asyncio.run(extract_transcript(video_url))
 
 
 if __name__ == '__main__':
     start_time = time.time()
     video_url = "https://www.youtube.com/watch?v=wn-tTeOmVRE"
-    transcript = extract_transcript(video_url)
+    
+    # Use async version
+    import asyncio
+    transcript = asyncio.run(extract_transcript(video_url))
+    
     end_time = time.time()
     print(f"Transcript extracted in {end_time-start_time:.2f} seconds")
 

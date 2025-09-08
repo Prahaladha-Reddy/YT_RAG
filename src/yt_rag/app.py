@@ -9,7 +9,7 @@ if sys.platform.startswith("win"):
 
 app = FastAPI(
     title="RAG Pipeline API",
-    description="An API to process YouTube videos and query them using a RAG pipeline.",
+    description="An API to process YouTube videos and query them using   a RAG pipeline.",
     version="1.0.0"
 )
 
