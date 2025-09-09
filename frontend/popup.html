@@ -1,15 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>AI Extension Popup</title>
-  <link rel="stylesheet" href="popup.css" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Chat</title>
+    <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <h1>AI Frontend</h1>
-  <button id="run">Run</button>
-  <pre id="out"></pre>
-  <script src="popup.js"></script>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 YouTube Chat</h1>
+            <p>AI-powered video conversations</p>
+        </div>
+
+        <div id="no-video" class="hidden">
+            <div class="no-video-icon">📺</div>
+            <div class="no-video-text">Not on YouTube</div>
+            <div class="no-video-subtext">Navigate to a YouTube video page to start chatting about the content</div>
+        </div>
+
+        <div id="content" class="hidden">
+            <button id="process-btn">🚀 Process Video</button>
+            <div id="chat-history">
+                <div class="empty-chat">
+                    <div class="empty-chat-icon">💬</div>
+                    <div>Start a conversation about this video!</div>
+                </div>
+            </div>
+            <div class="typing-indicator">
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+            <div id="input-area">
+                <input type="text" id="message-input" placeholder="Ask about the video..." disabled>
+                <button id="send-btn" disabled>Send</button>
+            </div>
+        </div>
+    </div>
+    <script src="popup.js"></script>
 </body>
 </html>
