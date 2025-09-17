@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "YouTube Chat",
+    "version": "1.0",
+    "description": "Analyzes YouTube videos and enables chatting with conversation history.",
+    "action": {
+        "default_popup": "index.html"
+    },
+    "icons": {
+        "16":"icons/logo.png",
+        "48":"icons/logo.png",
+        "128": "icons/logo.png"
+    },    
+    "permissions": [
+        "tabs",
+        "activeTab",
+        "storage"
+    ],
+    "host_permissions": [
+        "http://localhost:8000/*"
+    ]
+}
