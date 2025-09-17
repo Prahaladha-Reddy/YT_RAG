@@ -59,7 +59,11 @@ def trascript_chunking_by_time(
 
 async def get_transcript_chunks(youtube_url: str, chunk_duration: int, overlap_entires):
     
-    transcript_data = await extract_transcript(youtube_url)
+    try:
+        transcript_data = await extract_transcript(youtube_url)
+    except Exception as e:
+        logger.error(f"Playwright extraction failed with error: {str(e)}")
+        transcript_data = []    
     
     if transcript_data:
         logger.info("Transcript data extracted with playwright")
