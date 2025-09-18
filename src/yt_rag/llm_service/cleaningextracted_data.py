@@ -1,5 +1,5 @@
 from google.genai import types
-
+import requests
 def extractimagename(retrieved_frames_metadata):  
   file_name=[]
   for item in retrieved_frames_metadata:
@@ -28,3 +28,14 @@ def image2bytes_converter(paths):
     )
     encoded_images.append(image_encoded)
   return encoded_images
+
+def online_image_to_bytes(image_url=[]):
+  images=[]
+  for url in image_url:
+    image_bytes = requests.get(url).content
+    image = types.Part.from_bytes(
+    data=image_bytes, mime_type="image/jpeg"
+  )
+    images.append(image)
+  return images
+  

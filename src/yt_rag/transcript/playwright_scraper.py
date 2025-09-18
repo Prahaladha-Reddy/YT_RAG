@@ -2,6 +2,7 @@ from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
 import json
 import time
+import asyncio
 
 def timestamp_to_seconds(timestamp_str: str) -> int:
     time_parts = timestamp_str.split(':')
@@ -127,6 +128,16 @@ async def extract_transcript(video_url: str):
             await browser.close()
 
 
+async def transcript_combined_chunk(video_url:str):
+    transcript = await extract_transcript(video_url)
+    big_chunk=""
+    for item in transcript:
+        big_chunk+=" "+item['text']
+    return big_chunk , transcript
+
+
+
+
 # For backward compatibility, keep a sync wrapper
 def extract_transcript_sync(video_url: str):
     """
@@ -134,14 +145,11 @@ def extract_transcript_sync(video_url: str):
     """
     import asyncio
     
-    # Create a new event loop for this thread
     try:
         loop = asyncio.get_event_loop()
         if loop.is_running():
-            # If we're already in an async context, we can't use this sync wrapper
             raise RuntimeError("Cannot call sync function from async context. Use extract_transcript directly.")
     except RuntimeError:
-        # No event loop running, create a new one
         pass
     
     return asyncio.run(extract_transcript(video_url))
@@ -149,14 +157,13 @@ def extract_transcript_sync(video_url: str):
 
 if __name__ == '__main__':
     start_time = time.time()
-    video_url = "https://www.youtube.com/watch?v=wn-tTeOmVRE"
+    video_url = "https://youtu.be/OfOPrmnHRxw?si=PZcOEUnRMrwcfOuS"
     
-    # Use async version
-    import asyncio
-    transcript = asyncio.run(extract_transcript(video_url))
+    transcript = asyncio.run(transcript_combined_chunk(video_url))
     
     end_time = time.time()
     print(f"Transcript extracted in {end_time-start_time:.2f} seconds")
+    print(transcript)
 
-    with open("transcript1.json", "w", encoding="utf-8") as f:
-        json.dump(transcript, f, ensure_ascii=False, indent=2)
+"""     with open("transcript1.json", "w", encoding="utf-8") as f:
+        json.dump(transcript, f, ensure_ascii=False, indent=2) """

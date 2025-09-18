@@ -3,10 +3,8 @@ import json
 import uuid
 import logging
 from yt_rag.transcript.fallback_transcript_extraction import fallback_transcript_extract
-from yt_rag.transcript.playwright_scraper import extract_transcript
+from yt_rag.transcript.playwright_scraper import extract_transcript , transcript_combined_chunk
 from yt_rag.helper.get_id_from_youtube_url import get_video_id
-from yt_rag.transcript.playwright_scraper import extract_transcript
-
 logger = logging.getLogger(__name__)
 
 
@@ -60,7 +58,7 @@ def trascript_chunking_by_time(
 async def get_transcript_chunks(youtube_url: str, chunk_duration: int, overlap_entires):
     
     try:
-        transcript_data = await extract_transcript(youtube_url)
+        big_chunk,transcript_data = await transcript_combined_chunk(youtube_url)
     except Exception as e:
         logger.error(f"Playwright extraction failed with error: {str(e)}")
         transcript_data = []    
@@ -76,7 +74,7 @@ async def get_transcript_chunks(youtube_url: str, chunk_duration: int, overlap_e
             overlap_entires=overlap_entires        
         )
         logger.info(f"Successfully chunked into : {len(transcript_chunks)} chunks")
-        return transcript_chunks
+        return transcript_chunks , big_chunk
     else:
         print(f"Using fall back to extract transcript")
         fallback_transcript_data = fallback_transcript_extract(youtube_url)
@@ -91,6 +89,6 @@ async def get_transcript_chunks(youtube_url: str, chunk_duration: int, overlap_e
                 overlap_entires=5        
             )
             logger.info(f"Successfully chunked into : {len(transcript_chunks)} chunks")
-            return transcript_chunks
+            return big_chunk,transcript_chunks
         else:
             return []

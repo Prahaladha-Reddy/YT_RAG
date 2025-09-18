@@ -51,11 +51,5 @@ def collect_frames_from_ffmpeg(youtube_url: str):
     logger.info("Frames extraction completed")
     
     images_folder_path = f"./{video_id}"
-    images = list_images(images_folder_path)
     
-    images_metadata = [
-        {"path": image_path, "id": str(uuid.uuid4())}
-        for image_path in images
-    ]
-    
-    return images_folder_path, images_metadata
+    return images_folder_path
