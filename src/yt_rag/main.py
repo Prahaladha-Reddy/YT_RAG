@@ -5,6 +5,65 @@ from yt_rag.vector_store.embeddings import create_text_embeddings
 from yt_rag.llm_service.cleaningextracted_data import extractchunk, extractimagename, image2bytes_converter
 from yt_rag.llm_service.system_prompt import system_prompt
 
+
+"""
+async def process_youtube_video(youtube_url: str):
+
+    try:
+        video_id = get_video_id(youtube_url)
+        pg_vector = PG_Vector(video_id)
+        
+        if pg_vector.does_video_exist(video_id):
+            logger.info(f"Video {video_id} already exists in database, skipping processing")
+            return video_id
+        else:
+            pg_vector.video_info(summary="",processed="PROCESSING")
+        transcript_chunks, image_folder_path, big_chunk = await extract_video_content(youtube_url)
+        
+        if transcript_chunks:
+            with open(f"transcript_{video_id}.json", "w", encoding="utf-8") as f:
+                data = json.dumps(transcript_chunks, default=str)
+                f.write(data)
+        
+        if image_folder_path:
+            success = await process_image_embeddings(pg_vector, image_folder_path)
+            if not success:
+                logger.warning("Image processing failed")
+        else:
+            logger.warning("No image frames extracted, skipping image processing")
+        
+        if transcript_chunks:
+            success = await process_text_embeddings(pg_vector, transcript_chunks)
+            if not success:
+                logger.warning("Text processing failed")
+        else:
+            logger.warning("No transcript chunks extracted, skipping text processing")
+        
+        if big_chunk:
+            pg_vector.video_info(big_chunk)
+            
+        return video_id
+        
+    except Exception as e:
+        logger.error(f"Error in video processing pipeline: {e}")
+        logger.error(f"Full traceback: {traceback.format_exc()}")
+        return False
+
+async def main():
+    youtube_url = "https://youtu.be/wCNIhFdhgLE?si=A0isI2yoAwtsFV9C"
+    
+    logger.info("Starting YouTube RAG processing pipeline")
+    success = await process_youtube_video(youtube_url)
+    
+    if success:
+        logger.info("Video processing completed successfully!")
+    else:
+        logger.error("Video processing failed!")
+        return 1
+    
+    return 0
+"""
+
 class RAGPipeline:
     def __init__(self, video_url, memory_file="conversation_memory.json"):
         self.video_url = video_url
