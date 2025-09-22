@@ -44,10 +44,9 @@ rag_function_declaration = types.FunctionDeclaration(
     parameters=types.Schema(
         type=types.Type.OBJECT,
         properties={
-            "video_id": types.Schema(type=types.Type.STRING, description="Unique identifier of a YouTube video"),
             "query": types.Schema(type=types.Type.STRING, description="Efficient query for the RAG tool to find relevant data"),
         },
-        required=["video_id", "query"]
+        required=["query"]
     ),
 )
 

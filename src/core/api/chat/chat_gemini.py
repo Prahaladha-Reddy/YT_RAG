@@ -47,7 +47,7 @@ class LLMClient:
                             "text": message["content"]
                         }]
                     })
-            logger.info(f"Success=> History is loaded from supabase")
+        logger.info(f"Success=> History is loaded from supabase")
             # print(f"History loaded successfully from supabase")
             
     def run(self, prompt):
@@ -90,24 +90,26 @@ class LLMClient:
                 
                 requested_tool_calls = [{"tool_name": function_call.name, "tool_args": function_call.args} for function_call in response.function_calls]
                 
+                # Insert tool calls as seperate message in supabase
                 self.supabase.table("chat_messages").insert({
                     "chat_id": self.chat_id,
                     "role": "ASSISTANT",
                     "tool_calls": requested_tool_calls
                 }).execute()
-                print("Model requested tool call")
+                
+                logger.info("Model requested tool call")
                 
                 # Execute tools with models arguments
                 for function_call in response.function_calls:
                     tool_function = self.tools_dict["get_relevent_multimodal_data"]
                     
                     relevant_content = tool_function(
-                        video_id= function_call.args["video_id"],
+                        video_id= self.video_id,
                         query= function_call.args["query"]
                     )
                     # logger.info(f"Tool executed: {function_call.get("name", "")}")
                     contents.append(relevant_content)
-                print("Success: Tools completed execution")
+                logger.info("Success: Tools completed execution")
             else:
                 self.supabase.table("chat_messages").insert({
                     "chat_id":self.chat_id,
