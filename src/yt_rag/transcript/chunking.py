@@ -1,3 +1,4 @@
+import asyncio
 import re
 import json
 import uuid
@@ -77,7 +78,7 @@ async def get_transcript_chunks(youtube_url: str, chunk_duration: int, overlap_e
         return transcript_chunks , big_chunk
     else:
         print(f"Using fall back to extract transcript")
-        fallback_transcript_data = fallback_transcript_extract(youtube_url)
+        big_chunk, fallback_transcript_data = fallback_transcript_extract(youtube_url)
         if fallback_transcript_data:
             logger.info("Transcript data extracted with fallback YoutubeTranscriptAPI")
         
@@ -89,6 +90,12 @@ async def get_transcript_chunks(youtube_url: str, chunk_duration: int, overlap_e
                 overlap_entires=5        
             )
             logger.info(f"Successfully chunked into : {len(transcript_chunks)} chunks")
-            return big_chunk,transcript_chunks
+            return big_chunk, transcript_chunks
         else:
             return []
+
+if __name__ == "__main__":
+    big_chunk, transcript_chunks = asyncio.run(get_transcript_chunks("https://www.youtube.com/watch?v=GOejI6c0CMQ", 200, 5))
+    # print(big_chunk, transcript_chunks)
+    # print(len(transcript_chunks))
+    

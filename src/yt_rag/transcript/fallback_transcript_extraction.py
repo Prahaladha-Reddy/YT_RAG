@@ -10,18 +10,22 @@ def fallback_transcript_extract(youtube_url: str):
             languages = ("en", 'hi', "es", "de", "te")
         )
         
-        transcript = format_fetched_transcript(transcript_data)
-        return transcript
+        big_chunk, transcript_chunks = format_fetched_transcript(transcript_data)
+        return big_chunk, transcript_chunks
     except NoTranscriptFound as e:
         return []
 
 def format_fetched_transcript(transcript_data):
-    transcript = []
+    big_chunk = ""
+    transcript_chunks = []
     for snippet in transcript_data.snippets:
-        transcript.append({
+        big_chunk += f" {snippet.text}"
+        transcript_chunks.append({
             "text": snippet.text,
             "seconds": snippet.start
         })
     
-    return transcript
+    return big_chunk, transcript_chunks
         
+if __name__ == "__main__":
+    big_chunk, transcript_chunks = fallback_transcript_extract("https://www.youtube.com/watch?v=GOejI6c0CMQ")
