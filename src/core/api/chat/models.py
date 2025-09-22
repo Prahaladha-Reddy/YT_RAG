@@ -1,21 +1,24 @@
 import datetime
-from typing import Literal, Optional
+from typing import Literal, Optional, List
 from pydantic import BaseModel
+import uuid
 
 
-class SampleMessage(BaseModel):
-    content: str
-    
 class ChatRequest(BaseModel):
-    videoId: str
+    video_id: str
+    query: str
+class ChatResponse(BaseModel):
     content: str
 
 class ChatMessage(BaseModel):
-    id: str
-    created_at: datetime
-    updated_at: datetime
-    processed_video_id: datetime
-    user_id: str
-    role: Literal["ASSISTANT", "USER"]
+    id: uuid.UUID
+    role: Literal["USER", "ASSISTANT"]
     content: str
-    metadata: dict | None
+    timestamp: datetime
+    video_id: Optional[str] = None
+
+class ChatHistoryRequest(BaseModel):
+    video_id: str
+
+class ChatHistoryResponse(BaseModel):
+    history: List[ChatMessage]
