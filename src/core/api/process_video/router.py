@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Dict
 from supabase import AsyncClient
 
-from core.api.process_video.models import ProcessVideoRequest, ProcessVideoResponse, VideoStatusRequest, VideoStatusResponse
 from core.lib.db import get_supabase_client
 from core.lib.auth import verify_current_user
 from yt_rag.processors import process_youtube_video
@@ -15,7 +14,6 @@ async def process_video(
     user: Dict[str, any] = Depends(verify_current_user),
     supabase: AsyncClient = Depends(get_supabase_client)
 ):
-    print(f"user: {user}")
     try:
         response = (
             await supabase.table("videos")

@@ -8,8 +8,8 @@ import uvicorn
 import asyncio
 import sys
 from dotenv import load_dotenv
-from api.chat.router import chat_router
-from api.process_video.router import video_router
+from core.api.chat.router import chat_router
+from core.api.process_video.router import video_router
 
 load_dotenv()
 
@@ -48,7 +48,7 @@ async def check_supabase(
     user: Dict[str, Any] = Depends(verify_current_user),
     supabse: AsyncClient = Depends(get_supabase_client)
 ):
-    print(user)
+    # print(user)
     return {
         "user": user
     }

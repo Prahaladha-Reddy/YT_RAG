@@ -56,7 +56,7 @@ async def generate_chat(
         prompt=request.query
     )
     
-    print(response)
+    # print(response)
     
     return ChatResponse(
         content= response
