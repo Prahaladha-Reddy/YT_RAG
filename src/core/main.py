@@ -10,7 +10,7 @@ import sys
 from dotenv import load_dotenv
 from core.api.chat.router import chat_router
 from core.api.process_video.router import video_router
-
+from core.api.chat.notes_router import notes_router
 load_dotenv()
 
 BASE_PATH = "/core/v1"
@@ -55,6 +55,7 @@ async def check_supabase(
     
 app.include_router(router=chat_router, prefix=f"{BASE_PATH}/chat")
 app.include_router(router=video_router, prefix=f"{BASE_PATH}/video")
+app.include_router(router=notes_router, prefix=f"{BASE_PATH}/notes")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)

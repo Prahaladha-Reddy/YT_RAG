@@ -46,8 +46,7 @@ def trascript_chunking_by_time(
             chunk_text = " ".join(e["text"] for e in current_chunk)
             chunks.append({
                 "page_content":chunk_text,
-                "metadata":{"start":current_start, "video_id":video_id},
-                "id": str(uuid.uuid4())
+                "start_time":current_start
             })
     
         return chunks
