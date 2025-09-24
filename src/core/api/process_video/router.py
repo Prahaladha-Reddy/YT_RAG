@@ -45,7 +45,12 @@ async def get_video_status(
     try:
         status_response = await supabase.table("videos").select("processed").eq("video_id",video_id).execute()
         if status_response and len(status_response.data) > 0:
-            return {"status": "processed"}
+            if status_response.data[0]["processed"] == "SUCCESS":
+                return {"status": "processed"}
+            elif status_response.data[0]["processed"] == "PROCESSING":
+                return {"status": "processing"}
+            else:
+                return {"status": "not_processed"}
         else:
             return {"status": "not_processed"}
     except Exception as e:
