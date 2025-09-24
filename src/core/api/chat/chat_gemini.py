@@ -1,26 +1,30 @@
 # Define the agent
-from core.api.chat.prompts import SYSTEM_PROMPT
+from core.assistent_prompts.prompt import assistant_prompt,assistant_prompt_with_notes_extra
 from core.api.chat.tools import get_tools, get_tools_dict
 from core.database.supabase_client import get_supabase_client
 from google.genai.types import Part
 from yt_rag.llm_service.gemini_client import get_gemini_client
 import logging
-
+from core.api.chat.create_notes import extract_notes
 logger = logging.getLogger(__name__)
 
-
 class LLMClient:
-    def __init__(self, video_id: str, user_id: str, chat_id: str):
+    def __init__(self, video_id: str, user_id: str, chat_id: str,notes_id:str=None,system_prompt=assistant_prompt):
         self.history = []
         self.llm_client = get_gemini_client()
         self.supabase = get_supabase_client()
         self.video_id = video_id
         self.user_id = user_id
         self.chat_id = chat_id
+        self.notes_id=notes_id
         self.llm_tools = get_tools()
         self.tools_dict = get_tools_dict()
+        self.assistant_prompt=assistant_prompt
         # print(self.llm_tools)
-        
+        if self.notes_id is not None:
+            self.assistant_prompt+="/n"+assistant_prompt_with_notes_extra
+
+
     def load_history(self):
         response = (
             self.supabase.table("chat")
@@ -70,13 +74,16 @@ class LLMClient:
         logger.info("Success: Insert user message into supabase")
         
         while True:
-            # print(contents)
-            
+            summary=self.supabase.table("videos").select("summary").eq("video_id", self.video_id).execute()
+            notes=extract_notes(self.notes_id)
+            print(notes)
+            print(summary.data[0]["summary"])
+            print(self.assistant_prompt.format(video_summary=summary.data[0]["summary"],notes=notes))
             response = self.llm_client.models.generate_content(
                 model="gemini-2.0-flash",
                 contents = contents,
                 config = {
-                    "system_instruction": SYSTEM_PROMPT,
+                    "system_instruction": self.assistant_prompt.format(video_summary=summary.data[0]["summary"],notes=notes),
                     "temperature": 0.5,
                     "tools": self.llm_tools
                 },
@@ -91,7 +98,7 @@ class LLMClient:
                 requested_tool_calls = [{"tool_name": function_call.name, "tool_args": function_call.args} for function_call in response.function_calls]
                 
                 # Insert tool calls as seperate message in supabase
-                self.supabase.table("chat_messages").insert({
+                tool_call_message = self.supabase.table("chat_messages").insert({
                     "chat_id": self.chat_id,
                     "role": "ASSISTANT",
                     "tool_calls": requested_tool_calls
@@ -103,7 +110,7 @@ class LLMClient:
                 for function_call in response.function_calls:
                     tool_function = self.tools_dict["get_relevent_multimodal_data"]
                     
-                    relevant_content = tool_function(
+                    relevant_content, = tool_function(
                         video_id= self.video_id,
                         query= function_call.args["query"]
                     )
@@ -125,3 +132,4 @@ class LLMClient:
                 logger.info(f"Success=> Model generated final response: {response.text[:20]}")
                 # print(f"Success: Model generated final response=> {response.text}")
                 return response.text
+

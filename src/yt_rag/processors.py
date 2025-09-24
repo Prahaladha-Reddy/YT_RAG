@@ -9,7 +9,7 @@ from yt_rag.frames.collect_frames import collect_frames_from_ffmpeg
 from yt_rag.vector_store.embeddings import create_embeddings_from_folder, create_text_embeddings_batch
 from yt_rag.helper.get_id_from_youtube_url import get_video_id
 from yt_rag.vector_store.pg_vector_operations import PG_Vector,PG_Vector_search
-
+from yt_rag.llm_service.summarize_transcript import summarize_transcript
 DEFAULT_CHUNK_DURATION = 50
 DEFAULT_OVERLAP_ENTRIES = 5
 
@@ -95,6 +95,7 @@ async def process_text_embeddings(pg_vector: PG_Vector, transcript_chunks: List[
     """
     try:
         texts_to_embed = [chunk["page_content"] for chunk in transcript_chunks]
+
         text_embeddings = create_text_embeddings_batch(texts_to_embed)
         if not text_embeddings:
             logger.error("No text embeddings generated")
@@ -151,7 +152,8 @@ async def process_youtube_video(youtube_url: str):
             logger.warning("No transcript chunks extracted, skipping text processing")
         
         if big_chunk:
-            pg_vector.video_info(big_chunk)
+            summary = summarize_transcript(big_chunk)
+            pg_vector.video_info(summary)
             
         return video_id
         

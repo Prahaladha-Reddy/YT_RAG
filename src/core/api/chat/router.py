@@ -4,13 +4,15 @@ from core.api.chat.chat_gemini import LLMClient
 from core.lib.auth import verify_current_user
 from fastapi import APIRouter, HTTPException, Depends
 from supabase import AsyncClient
-from core.api.chat.models import ChatMessage, ChatRequest, ChatResponse, ChatHistoryResponse, ChatHistoryRequest
+from core.api.chat.models import ChatMessage, ChatRequest, ChatResponse, ChatHistoryResponse, ChatHistoryRequest,CreateNotesRequest,CreateNotesResponse,Match_Notes_HeadingsResponse,Match_Notes_Headings_Request
 from core.lib.db import get_supabase_client
 from pydantic import BaseModel
 from typing import Optional, Literal, List, Dict, Any
-
- 
+from core.api.chat.create_notes import create_notes
 chat_router = APIRouter()
+from core.api.chat.create_notes import match_notes_headings,update_notes_status
+from core.api.chat.models import Update_Notes_Status_Response,Update_Notes_Status_Request
+
 
 @chat_router.post("/generate", response_model=ChatResponse)
 async def generate_chat(
@@ -44,11 +46,19 @@ async def generate_chat(
         chat_id = chat_session_response.data[0]["id"]
     
     # Load the LLM
-    llm_client = LLMClient(
-        video_id=request.video_id,
-        user_id=user.id,
-        chat_id=chat_id,
-    )
+    if request.notes_ids is not None:
+        llm_client = LLMClient(
+            video_id=request.video_id,
+            user_id=user.id,
+            chat_id=chat_id,
+            notes_id=request.notes_ids
+        )
+    else:
+        llm_client = LLMClient(
+            video_id=request.video_id,
+            user_id=user.id,
+            chat_id=chat_id
+        )
     
     llm_client.load_history()
     

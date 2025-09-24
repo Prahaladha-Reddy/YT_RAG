@@ -33,7 +33,7 @@ def get_relevent_multimodal_data(video_id: str, query: str):
         {"text": data}
     )
     
-    return as_messages
+    return as_messages, 
         
     
     

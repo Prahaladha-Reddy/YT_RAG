@@ -3,7 +3,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi import Request
 from typing import Optional, Dict, Any
 from supabase_auth.types import User
-
+import json
 from core.lib.db import get_supabase_client
 
 security = HTTPBearer()
@@ -11,10 +11,9 @@ security = HTTPBearer()
 # BASE_PATH = "/core/v1"
 
 async def verify_current_user(
-    request: Request,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
 ) -> Optional[User]:
-    
+
     supabase =await get_supabase_client()
     
     if not credentials:

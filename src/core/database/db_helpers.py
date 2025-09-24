@@ -45,3 +45,20 @@ def list_folder_contents_os_walk(start_path):
             total_files.append(file_path)
            
     return total_files
+
+
+def match_notes_headings(user_id,query_embedding):
+    try:
+      query_embedding=query_embedding.tolist() if isinstance(query_embedding, np.ndarray) else query_embedding
+      print("Matching notes with headings")
+      res = client.rpc(
+        "match_notes_headings",
+        {
+          "user_id": user_id,
+          "query_embedding": query_embedding
+          }).execute()
+      print("Matching notes with headings complete")
+      return res.data
+    except Exception as e:
+      print(e)
+      return False
