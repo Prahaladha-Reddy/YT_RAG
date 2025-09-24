@@ -9,7 +9,7 @@ from typing import List
 class ChatRequest(BaseModel):
     video_id: str
     query: str
-    notes_ids:Optional[str]=None
+    notes_ids: Optional[List[str]]=None
 class ChatResponse(BaseModel):
     content: str
 
