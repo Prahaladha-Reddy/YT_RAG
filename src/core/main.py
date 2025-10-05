@@ -1,3 +1,8 @@
+# Add src directory to Python path for module resolution
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
 from contextlib import asynccontextmanager
 from typing import Any, Dict
 from core.lib.auth import get_supabase_client, verify_current_user
@@ -6,7 +11,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from supabase import AsyncClient
 import uvicorn
 import asyncio
-import sys
 from dotenv import load_dotenv
 from core.api.chat.router import chat_router
 from core.api.process_video.router import video_router
@@ -57,5 +61,9 @@ app.include_router(router=chat_router, prefix=f"{BASE_PATH}/chat")
 app.include_router(router=video_router, prefix=f"{BASE_PATH}/video")
 app.include_router(router=notes_router, prefix=f"{BASE_PATH}/notes")
 
+def main():
+    """Entry point for the application."""
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    main()
