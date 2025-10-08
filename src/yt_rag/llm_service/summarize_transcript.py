@@ -1,6 +1,8 @@
 from yt_rag.llm_service.get_groq_client import get_gemma_client
 from yt_rag.rag_prompts.prompts import summary_prompt
-
+import logging
+import traceback
+logger = logging.getLogger(__name__)
 def summarize_transcript(transcript):
     try:
         client = get_gemma_client()

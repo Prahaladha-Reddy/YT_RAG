@@ -20,7 +20,6 @@ class LLMClient:
         self.llm_tools = get_tools()
         self.tools_dict = get_tools_dict()
         self.assistant_prompt=assistant_prompt
-        # print(self.llm_tools)
         if self.notes_id is not None:
             self.assistant_prompt+="/n"+assistant_prompt_with_notes_extra
 
