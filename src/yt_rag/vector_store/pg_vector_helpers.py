@@ -32,7 +32,7 @@ def upsert_transcript_chunks_embeddngs_to_collection(video_id:str,transcript_emb
     print(e)
     return False
 
-def push_to_bucket(image_folder,supabase_url:str="'https://sofowbahdzuboflvuprw.supabase.co",bucket_name="images"):
+def push_to_bucket(image_folder,supabase_url:str="https://sofowbahdzuboflvuprw.supabase.co",bucket_name="images"):
   files=list_folder_contents_os_walk(image_folder)
   try :
     for file in files:

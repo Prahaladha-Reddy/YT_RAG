@@ -5,6 +5,8 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "dagshub>=0.6.3",
+    "deepeval>=3.6.6",
     "fastembed>=0.7.1",
     "google-genai>=1.33.0",
     "groq>=0.31.0",
@@ -24,6 +26,7 @@ dependencies = [
     "opik>=1.8.33",
     "pinecone>=7.3.0",
     "playwright>=1.55.0",
+    "plotly>=6.3.1",
     "python-dotenv>=1.1.1",
     "qdrant-client>=1.15.1",
     "replicate>=1.0.7",

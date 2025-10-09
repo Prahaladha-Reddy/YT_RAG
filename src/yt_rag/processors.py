@@ -1,14 +1,13 @@
 import asyncio
 import logging
-import uuid
 import json
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Dict
 import traceback
 from yt_rag.transcript.chunking import get_transcript_chunks
 from yt_rag.frames.collect_frames import collect_frames_from_ffmpeg
 from yt_rag.vector_store.embeddings import create_embeddings_from_folder, create_text_embeddings_batch
 from yt_rag.helper.get_id_from_youtube_url import get_video_id
-from yt_rag.vector_store.pg_vector_operations import PG_Vector,PG_Vector_search
+from yt_rag.vector_store.pg_vector_operations import PG_Vector
 from yt_rag.llm_service.summarize_transcript import summarize_transcript
 DEFAULT_CHUNK_DURATION = 50
 DEFAULT_OVERLAP_ENTRIES = 5
