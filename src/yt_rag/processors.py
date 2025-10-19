@@ -162,7 +162,7 @@ async def process_youtube_video(youtube_url: str):
         return False
 
 async def main():
-    youtube_url = "https://youtu.be/wCNIhFdhgLE?si=A0isI2yoAwtsFV9C"
+    youtube_url = "https://www.youtube.com/watch?v=__yqhaqRfqw"
     
     logger.info("Starting YouTube RAG processing pipeline")
     success = await process_youtube_video(youtube_url)
