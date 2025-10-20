@@ -1,11 +1,14 @@
-@"
-# Python-ish .gitignore
+# Python
 .venv/
 env/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
-# Common large artefacts
+
+# Environment variables
+.env
+
+# Large files
 *.mp4
 *.mkv
 *.zip
@@ -19,7 +22,13 @@ __pycache__/
 *.h5
 *.onnx
 *.parquet
-"@ | Out-File -Encoding utf8 .gitignore
-git add .gitignore
-git commit -m "Add .gitignore for large/derived files"
-.env
+
+# Data files
+*.csv
+
+# Lock files
+uv.lock
+package-lock.json
+
+# Jupyter notebooks
+*.ipynb
